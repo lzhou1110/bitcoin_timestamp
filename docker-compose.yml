@@ -1,0 +1,37 @@
+version: '3'
+services:
+  honest:
+    image: timestamp_bitcoind:latest
+    command: >
+      bash -c "./src/bitcoind -debug=net"
+    networks:
+      - closed_network
+    cap_add:
+      - SYS_TIME
+
+  honest-miner:
+    image: timestamp_miner:latest
+
+  attacker1:
+    image: timestamp_bitcoind:latest
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1 FAKETIME='-70m'
+      && ./src/bitcoind -addnode=honest"
+    networks:
+      - closed_network
+    cap_add:
+      - SYS_TIME
+
+  attacker2:
+    image: timestamp_bitcoind:latest
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1 FAKETIME='-70m'
+      && ./src/bitcoind -addnode=honest"
+    networks:
+      - closed_network
+    cap_add:
+      - SYS_TIME
+
+networks:
+  closed_network:
+    internal: true
