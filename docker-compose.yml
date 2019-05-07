@@ -2,26 +2,39 @@ version: '3'
 services:
   honest:
     container_name: honest
-    image: timestamp_bitcoind:latest
+    image: bitcoind_original:latest
     command: >
       bash -c "./src/bitcoind -debug=net -server -rpcuser=user -rpcpassword=pass --rpcbind=10.255.0.0 -rpcallowip=10.0.0.0/8 -checkpoints=0"
     networks:
-      closed_network:
+      open_network:
         ipv4_address: 10.255.0.0
     cap_add:
       - SYS_TIME
 
 # replica works in cluster mode only
-  pyattacker1:
+  pyattacker:
     image: timestamp_attacker:latest
-    deploy:
-      mode: replicated
-      replicas: 2
+#    deploy:
+#      mode: replicated
+#      replicas: 2
     command: >
       bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
       && python3 app.py"
     networks:
-      - closed_network
+      - open_network
+    environment:
+      - FAKETIME_NO_CACHE=1
+      - FAKETIME=-70m
+      - HOST=10.255.0.0
+      - PORT=8332
+
+  pyattacker1:
+    image: timestamp_attacker:latest
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
+      && python3 app.py"
+    networks:
+      - open_network
     environment:
       - FAKETIME_NO_CACHE=1
       - FAKETIME=-70m
@@ -30,71 +43,38 @@ services:
 
   pyattacker2:
     image: timestamp_attacker:latest
-    deploy:
-      mode: replicated
-      replicas: 2
     command: >
       bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
       && python3 app.py"
     networks:
-      - closed_network
+      - open_network
     environment:
       - FAKETIME_NO_CACHE=1
       - FAKETIME=-70m
       - HOST=10.255.0.0
       - PORT=8332
 
-
-#  honest-miner:
-#    container_name: honest_miner
-#    image: timestamp_miner:latest
-#    command: >
-#      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-#      && python pyminer.py"
-#    networks:
-#      - closed_network
-#    environment:
-#      - FAKETIME_NO_CACHE=1
-#      - FAKETIME=+120m
-#      - PYTHONUNBUFFERED=1
-#      - HOST=10.255.0.0
-#      - PORT=8332
-#      - RPCUSER=user
-#      - RPCPASS=pass
-#      - SLEEPDURATION=2
-
-#  attacker1:
-#    container_name: attack_1
-#    image: timestamp_bitcoind:latest
-#    command: >
-#      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-#      && ./src/bitcoind -addnode=honest -checkpoints=0"
-#    networks:
-#      - closed_network
-#    environment:
-#      - FAKETIME_NO_CACHE=1
-#      - FAKETIME=-70m
-#    cap_add:
-#      - SYS_TIME
-#
-#  attacker2:
-#    container_name: attack_2
-#    image: timestamp_bitcoind:latest
-#    command: >
-#      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-#      && ./src/bitcoind -addnode=honest -checkpoints=0"
-#    networks:
-#      - closed_network
-#    environment:
-#      - FAKETIME_NO_CACHE=1
-#      - FAKETIME=-70m
-#    cap_add:
-#      - SYS_TIME
-
+  pyattacker3:
+    image: timestamp_attacker:latest
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
+      && python3 app.py"
+    networks:
+      - open_network
+    environment:
+      - FAKETIME_NO_CACHE=1
+      - FAKETIME=-70m
+      - HOST=10.255.0.0
+      - PORT=8332
 networks:
-  closed_network:
-    internal: true
+  open_network:
     ipam:
       driver: default
       config:
         - subnet: 10.0.0.0/8
+#  closed_network:
+#    internal: false
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 10.0.0.0/8

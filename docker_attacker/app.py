@@ -58,7 +58,7 @@ if __name__ == "__main__":
     time.sleep(10)
     print('Starting to attack')
     print_current_machine_time()
-    user_agent_to_send = 'agentalex'
+    user_agent_to_send = 'agent'
     version = struct.pack("i", 70015)  # corresponds to 0.15
     services = struct.pack("Q", 0)  # this "node" does nothing
     timestamp = struct.pack("Q", (int(time.time())))
