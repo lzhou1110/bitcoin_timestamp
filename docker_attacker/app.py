@@ -55,7 +55,6 @@ def read_a_message(sock):
 
 
 if __name__ == "__main__":
-    time.sleep(10)
     print('Starting to attack')
     print_current_machine_time()
     user_agent_to_send = 'agent'

@@ -1,25 +1,28 @@
 version: '3'
 services:
   honest:
+    image: lzhou1110/bitcoind_original:latest
     container_name: honest
-    image: bitcoind_original:latest
+    ports:
+      - "8333:8333"
     command: >
       bash -c "./src/bitcoind -debug=net -server -rpcuser=user -rpcpassword=pass --rpcbind=10.255.0.0 -rpcallowip=10.0.0.0/8 -checkpoints=0"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
     networks:
       open_network:
         ipv4_address: 10.255.0.0
     cap_add:
       - SYS_TIME
 
-# replica works in cluster mode only
   pyattacker:
-    image: timestamp_attacker:latest
-#    deploy:
-#      mode: replicated
-#      replicas: 2
+    image: lzhou1110/timestamp_attacker:latest
     command: >
       bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
       && python3 app.py"
+    depends_on:
+      - "honest"
     networks:
       - open_network
     environment:
@@ -28,53 +31,9 @@ services:
       - HOST=10.255.0.0
       - PORT=8332
 
-  pyattacker1:
-    image: timestamp_attacker:latest
-    command: >
-      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-      && python3 app.py"
-    networks:
-      - open_network
-    environment:
-      - FAKETIME_NO_CACHE=1
-      - FAKETIME=-70m
-      - HOST=10.255.0.0
-      - PORT=8332
-
-  pyattacker2:
-    image: timestamp_attacker:latest
-    command: >
-      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-      && python3 app.py"
-    networks:
-      - open_network
-    environment:
-      - FAKETIME_NO_CACHE=1
-      - FAKETIME=-70m
-      - HOST=10.255.0.0
-      - PORT=8332
-
-  pyattacker3:
-    image: timestamp_attacker:latest
-    command: >
-      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-      && python3 app.py"
-    networks:
-      - open_network
-    environment:
-      - FAKETIME_NO_CACHE=1
-      - FAKETIME=-70m
-      - HOST=10.255.0.0
-      - PORT=8332
 networks:
   open_network:
     ipam:
       driver: default
       config:
         - subnet: 10.0.0.0/8
-#  closed_network:
-#    internal: false
-#    ipam:
-#      driver: default
-#      config:
-#        - subnet: 10.0.0.0/8
