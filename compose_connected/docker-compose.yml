@@ -1,0 +1,36 @@
+version: '3'
+services:
+  honest:
+    image: lzhou1110/bitcoind_with_peers:latest
+    container_name: honest
+    ports:
+      - "8333:8333"
+    command: >
+      bash -c "./src/bitcoind -debug=net -server -rpcuser=user -rpcpassword=pass --rpcbind=10.255.0.0 -rpcallowip=10.0.0.0/8"
+    networks:
+      open_network:
+        ipv4_address: 10.255.0.0
+    cap_add:
+      - SYS_TIME
+
+  pyattacker:
+    image: lzhou1110/timestamp_attacker:latest
+    depends_on:
+      - "honest"
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
+      && python3 app.py"
+    networks:
+      - open_network
+    environment:
+      - FAKETIME_NO_CACHE=1
+      - FAKETIME=-70m
+      - HOST=10.255.0.0
+      - PORT=8332
+
+networks:
+  open_network:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/8

@@ -6,10 +6,7 @@ services:
     ports:
       - "8333:8333"
     command: >
-      bash -c "./src/bitcoind -debug=net -server -rpcuser=user -rpcpassword=pass --rpcbind=10.255.0.0 -rpcallowip=10.0.0.0/8 -checkpoints=0"
-    deploy:
-      placement:
-        constraints: [node.role == manager]
+      bash -c "./src/bitcoind -debug=net -server -rpcuser=user -rpcpassword=pass --rpcbind=10.255.0.0 -rpcallowip=10.0.0.0/8"
     networks:
       open_network:
         ipv4_address: 10.255.0.0
