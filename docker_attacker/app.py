@@ -86,7 +86,7 @@ if __name__ == "__main__":
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     attempts = 0
     try:
-        time.sleep(randint(0, 20))
+        time.sleep(random.randint(0, 20))
         some_existing_bitcoin_nodes = ["10.255.0.0"]
         sock.connect((random.choice(some_existing_bitcoin_nodes), 8333))
         sock.sendall(full_version_message)
