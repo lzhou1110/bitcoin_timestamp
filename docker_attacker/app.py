@@ -84,11 +84,18 @@ if __name__ == "__main__":
     checksum = sha256(sha256(payload).digest()).digest()[:4]
     full_version_message = network + command + payload_size + checksum + payload
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        some_existing_bitcoin_nodes = ["10.255.0.0"]
-        sock.connect((random.choice(some_existing_bitcoin_nodes), 8333))
-        sock.sendall(full_version_message)
-        first_received_message = read_a_message(sock)
-        print(f"Response: {first_received_message}")
-    finally:
-        sock.close()
+    attempts = 0
+    while attempts < 50:
+        try:
+            some_existing_bitcoin_nodes = ["10.255.0.0"]
+            sock.connect((random.choice(some_existing_bitcoin_nodes), 8333))
+            sock.sendall(full_version_message)
+            first_received_message = read_a_message(sock)
+            print(f"Response: {first_received_message}")
+            break
+        except:
+            attempts += 1
+            print(f"Had an issue, attempt {attempts}")
+            time.sleep(5)
+        finally:
+            sock.close()

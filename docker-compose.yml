@@ -22,7 +22,7 @@ services:
       - "honest"
     command: >
       bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-      && ./wait-for-it.sh honest:8333 -- python3 app.py"
+      && python3 app.py"
     networks:
       - open_network
     environment:
