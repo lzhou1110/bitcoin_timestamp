@@ -18,11 +18,11 @@ services:
 
   pyattacker:
     image: lzhou1110/timestamp_attacker:latest
-    command: >
-      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
-      && python3 app.py"
     depends_on:
       - "honest"
+    command: >
+      bash -c "export LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1
+      && ./wait-for-it.sh honest:8333 -- python3 app.py"
     networks:
       - open_network
     environment:
